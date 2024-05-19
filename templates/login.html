@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-login.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP - Login</title>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <a class="type1" href="/login">Login</a>
+            <a class="type2" href="/register">Register</a>
+        </ul>
+    </nav>
+    <div class="popup">
+        <section class="login-section">
+            <form class="form" method="post">
+                <h2>Login</h2>
+                <div class="form-element">
+                    <label class="label-password" for="email">Email:</label>
+                    <input type="text" name="email" id="email" placeholder="Enter your email" autocomplete="off" autofocus>
+                </div>
+                <div class="form-element">
+                    <label class="label-password" for="password">Password:</label>
+                    <input type="password" name="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="form-element">
+                    <label for="remember-me">
+                        <input type="checkbox" name="remember-me" id="remember-me">
+                        Remember Me
+                    </label>
+                </div>
+                <div class="form-element">
+                    <button class="sign-in-btn" type="submit">Sign In</button>
+                </div>
+                <div class="form-element">
+                    <a href="">Forgot your password?</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</body>
+</html>
