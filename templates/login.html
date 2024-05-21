@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/style-login.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
     <link rel="icon" href="/static/favicon.png">
     <title>KURYAPP - Login</title>
 </head>
@@ -17,21 +18,36 @@
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
             <a class="type1" href="/login">Login</a>
             <a class="type2" href="/register">Register</a>
         </ul>
     </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    
     <div class="popup">
         <section class="login-section">
             <form class="form" method="post">
                 <h2>Login</h2>
                 <div class="form-element">
                     <label class="label-password" for="email">Email:</label>
-                    <input type="text" name="email" id="email" placeholder="Enter your email" autocomplete="off" autofocus>
+                    <input type="text" name="email" id="email" placeholder="Enter your email" autocomplete="off" autofocus required>
                 </div>
                 <div class="form-element">
                     <label class="label-password" for="password">Password:</label>
-                    <input type="password" name="password" id="password" placeholder="Enter your password">
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
                 </div>
                 <div class="form-element">
                     <label for="remember-me">
@@ -48,5 +64,6 @@
             </form>
         </section>
     </div>
+    <script src="/static/hideFlash.js"></script>
 </body>
 </html>

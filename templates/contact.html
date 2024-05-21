@@ -17,8 +17,14 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="/about">About</a></li>
                 <li><a href="/contact">Contact</a></li>
-                <a class="type1" href="/login">Login</a>
-                <a class="type2" href="/register">Register</a>
+                <li><div class="vertical-line"></div></li>
+                {% if 'user_id' in session %}
+                <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+                <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="type1" href="/login">Login</a>
+                    <a class="type2" href="/register">Register</a>
+                {% endif %}
             </ul>
     </nav>
     <h1 class="contact-us">Contact Us</h1>

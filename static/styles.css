@@ -13,7 +13,8 @@ body{
     border-radius: 20px;
     background-color: rgb(255, 255, 255);
     margin-left: 10px;
-    padding: 12px;
+    padding: 16px;
+    font-size: 19px;
     font-weight: bold;
     color:#2c1784;
     transition: 200ms background-color;
@@ -25,11 +26,14 @@ background-color: rgb(230, 230, 230);
 
 .type2{
     all: unset;
-    background-color: rgb(44, 23, 132);
     color: white;
-    padding: 12px;
+    background-color: rgb(44, 23, 132);
+    padding: 16px;
+    font-weight: bold;
+    font-size: 17px;
     border-radius: 20px;
-    cursor: pointer;
+    transition: 200ms background-color;
+    cursor: pointer;   
 }
 
 .type2:hover{
@@ -50,13 +54,15 @@ background-color: rgb(230, 230, 230);
 }
 
 li{ 
+    justify-content: center;
     list-style: none;
     display: inline-block;
     font-size: 18px;
-    margin-right: 25px;
+    margin-right: 35px;
 }
 
 .navbar ul li a {
+    justify-content: center;
     color:rgb(44, 23, 132);
 }
 
@@ -66,4 +72,12 @@ li{
 .logo{
     display: flex;
     align-items: center;
+}
+
+.vertical-line {
+    width: 1px;
+    height: 50px; 
+    background-color: rgb(44, 23, 132);
+    margin: -20px 0px;
+    box-sizing: border-box;
 }

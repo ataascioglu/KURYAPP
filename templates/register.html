@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/style-register.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
     <link rel="icon" href="/static/favicon.png">
-    <title>KURYAPP - Login</title>
+    <title>KURYAPP - Register</title>
 </head>
 <body>
     <nav class="navbar">
@@ -17,29 +18,44 @@
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
             <a class="type1" href="/login">Login</a>
             <a class="type2" href="/register">Register</a>
         </ul>
     </nav>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    
     <div class="popup">
         <section class="login-section">
             <form class="form" method="post">
                 <h2>Register</h2>
                 <div class="form-element">
                     <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" autofocus>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" autofocus required>
                 </div>
                 <div class="form-element">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="off">
+                    <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="off" required>
                 </div>
                 <div class="form-element">
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password">
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 </div>
                 <div class="form-element">
                     <label for="confirm-password">Confirm Password:</label>
-                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password">
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
                 </div>
                 <div class="form-element">
                     <button class="register-btn" type="submit">Register</button>
@@ -50,5 +66,6 @@
             </form>
         </section>
     </div>
+    <script src="/static/hideFlash.js"></script>
 </body>
 </html>
