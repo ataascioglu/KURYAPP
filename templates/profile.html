@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/profile.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
     <link rel="icon" href="/static/favicon.png">
     <title>Profile</title>
 </head>
@@ -48,7 +49,10 @@
             <div id="address-info">
                 {% for address in addresses %}
                     <div class="address-item">
-                        <a href="/edit-address">Edit</a>
+                        <form action="/delete-address/{{ address[0] }}" method="POST">
+                            <input type="hidden" name="address_id" value="{{ address[0] }}">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>                                       
                         <div class="address-details">
                             <p><strong>Label:</strong> {{ address[0] }}</p>
                             <p><strong>Address:</strong> {{ address[1] }}</p>

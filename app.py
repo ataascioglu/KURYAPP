@@ -4,12 +4,12 @@ from datetime import datetime, timedelta, timezone
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Initialize Flask application
+
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = "your_secret_key"
+app.secret_key = "emauehjgk"
 SESSION_DURATION_DAYS = 7
 
-# Initialize database and create tables if they don't exist
+
 def init_db():
     con = sqlite3.connect('database.db')
     con.execute('''
@@ -78,6 +78,19 @@ def validate_session(session_id):
                 return user_id
     return None
 
+def update_address(user_id, label, address, city, postal_code):
+    print(f"Updating address for user {user_id}: {label}, {address}, {city}, {postal_code}")
+    return True
+
+def get_address(address_id):
+    con = get_db()
+    cur = con.cursor()
+    cur.execute('SELECT * FROM addresses WHERE id = ?', (address_id,))
+    address = cur.fetchone()
+    con.close()
+    return address
+
+
 @app.before_request
 def load_logged_in_user():
     session_id = request.cookies.get('session_id')
@@ -118,7 +131,6 @@ def login():
                 session['user_id'] = user[0]
                 session['username'] = user[1]
                 response = make_response(redirect(url_for('home')))
-                # Set max_age to None if remember_me is False, otherwise calculate based on SESSION_DURATION_DAYS
                 max_age = None if not remember_me else SESSION_DURATION_DAYS * 24 * 60 * 60
                 response.set_cookie('session_id', session_id, max_age=max_age, httponly=True)
                 flash("Successfully logged in!", "success")
@@ -176,7 +188,7 @@ def profile():
                 cur.execute('''
                     SELECT label, address, city, postal_code
                     FROM addresses
-                    WHERE user_id = ?
+                    WHERE user_id =?
                 ''', (user_id,))
                 addresses = cur.fetchall()
             except sqlite3.Error as e:
@@ -184,11 +196,16 @@ def profile():
             finally:
                 con.close()
         
+        session['addresses'] = addresses
+        
         return render_template('profile.html', addresses=addresses)
     else:
         flash("Please log in to view your profile", "error")
         return redirect(url_for('login'))
+
+
     
+
 @app.route('/add-address', methods=['GET', 'POST'])
 def add_address():
     if 'user_id' in session:
@@ -220,47 +237,24 @@ def add_address():
         flash('You need to login first', 'error')
         return redirect(url_for('login'))
     
-    
-@app.route('/edit-address', methods=['GET', 'POST'])
-def edit_address(address_id):
-    if 'user_id' in session:
-        con = get_db()
-        if con:
-            try:
-                cur = con.cursor()
-                cur.execute('SELECT * FROM addresses WHERE id = ?', (address_id,))
-                address = cur.fetchone()
-                if address:
-                    if request.method == 'POST':
-                        label = request.form['label']
-                        address = request.form['address']
-                        city = request.form['city']
-                        postal_code = request.form['postal_code']
-                        
-                        cur.execute('''
-                            UPDATE addresses
-                            SET label=?, address=?, city=?, postal_code=?
-                            WHERE id=?
-                        ''', (label, address, city, postal_code, address_id))
-                        con.commit()
-                        flash('Address updated successfully', 'success')
-                        return redirect(url_for('profile'))
-                    
-                    return render_template('edit-address.html', address=address)
-                else:
-                    flash('Address not found', 'error')
-                    return redirect(url_for('profile'))
-            except sqlite3.Error as e:
-                flash(f'Error fetching address: {e}', 'error')
-            finally:
-                con.close()
-        else:
-            flash('Database connection error', 'error')
-            return redirect(url_for('profile'))
-    else:
-        flash('You need to login first', 'error')
-        return redirect(url_for('login'))
 
+
+@app.route('/delete-address/<int:address_id>', methods=['POST'])
+def delete_address(address_id):
+    if request.method == 'POST':
+        address = get_address(address_id)
+        if address:
+            con = get_db()
+            con.execute('DELETE FROM addresses WHERE id = ?', (address_id,))
+            con.commit()
+            con.close()
+            flash('Address was successfully deleted!'.format(address['label']), 'success')
+        else:
+            flash('Address not found', 'error')
+    else:
+        flash('Invalid request method', 'error')
+
+    return redirect(url_for('profile'))
 
 
 
@@ -280,6 +274,7 @@ def logout():
     response.set_cookie('session_id', '', expires=0)
     flash("You have been logged out", "success")
     return response
+
 
 if __name__ == '__main__':
     app.run(debug=True)
