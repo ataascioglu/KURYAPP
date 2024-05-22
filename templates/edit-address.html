@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/profile.css">
+    <link rel="stylesheet" href="/static/edit-address.css">
     <link rel="icon" href="/static/favicon.png">
-    <title>Profile</title>
+    <title>Edit Address</title>
 </head>
 <body>
     <nav class="navbar">
@@ -17,6 +17,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
             {% if 'user_id' in session %}
             <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
             <a class="type2" href="{{ url_for('logout') }}">Logout</a>
@@ -26,7 +27,6 @@
             {% endif %}
         </ul>
     </nav>
-    
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -39,18 +39,36 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </div>
-    
     <div class="border-container">
-        <a class="type2" href="/add-address">Add Address</a> 
-        <a class="type2" href="/edit-address">Edit Address</a>
-        <br><br>
-        <div class="address-info-container">
-            <h3>Address Information</h3>
-            <div id="address-info"></div>
-        </div>
+        <div class="box">
+            <form class="edit-address-form">
+                <h2>Edit Address</h2>
+                <form action="/update_address" method="post" onsubmit="return validateForm()">
+                    <div class="form-element">
+                        <label for="label">Label:</label>
+                        <input type="text" id="label" name="label" required><br><br>
+                    </div>
+                    <div class="form-element">
+                        <label for="address">Address:</label>
+                        <input type="text" id="address" name="address"></input><br><br>
+                    </div>
+                    <div class="form-element">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" required><br><br>
+                    </div>
+                    <div class="form-element">    
+                        <label for="postal_code">Postal Code:</label>
+                        <input type="text" id="postal_code" name="postal_code" required><br><br>
+                    </div>
+                    <div class="form-element">
+                        <button type="submit">Save Address</button>
+                    </div>
+                </form>
+            </form>
+        </div>        
     </div>
-    
-    <script src="/static/validateForm.js"></script>
+
     <script src="/static/hideFlash.js"></script>
+    <script src="/static/validateForm.js"></script>
 </body>
 </html>

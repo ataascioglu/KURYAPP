@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, make_response
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize Flask application
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -42,13 +43,13 @@ def get_db():
 
 def create_session(user_id, remember_me):
     session_id = str(uuid.uuid4())
-    created_at = datetime.now()
+    created_at = datetime.now(timezone.utc)
     expires_at = created_at + timedelta(days=SESSION_DURATION_DAYS) if remember_me else created_at + timedelta(seconds=30)
     con = get_db()
     if con:
         cur = con.cursor()
         cur.execute("INSERT INTO sessions (session_id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)", 
-                    (session_id, user_id, created_at, expires_at))
+                    (session_id, user_id, created_at.isoformat(), expires_at.isoformat()))
         con.commit()
         con.close()
     return session_id, expires_at
@@ -62,7 +63,7 @@ def validate_session(session_id):
         con.close()
         if session_data:
             user_id, expires_at = session_data
-            if not expires_at or datetime.now() < datetime.fromisoformat(expires_at):
+            if not expires_at or datetime.now(timezone.utc) < datetime.fromisoformat(expires_at).astimezone(timezone.utc):
                 return user_id
     return None
 
@@ -98,18 +99,17 @@ def login():
         con = get_db()
         if con:
             cur = con.cursor()
-            cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+            cur.execute("SELECT * FROM users WHERE email =?", (email,))
             user = cur.fetchone()
             con.close()
-            if user and user[3] == password:
+            if user and check_password_hash(user[3], password):
                 session_id, expires_at = create_session(user[0], remember_me)
                 session['user_id'] = user[0]
                 session['username'] = user[1]
                 response = make_response(redirect(url_for('home')))
-                if remember_me:
-                    response.set_cookie('session_id', session_id, max_age=SESSION_DURATION_DAYS*24*60*60, httponly=True)
-                else:
-                    response.set_cookie('session_id', session_id, httponly=True)
+                # Set max_age to None if remember_me is False, otherwise calculate based on SESSION_DURATION_DAYS
+                max_age = None if not remember_me else SESSION_DURATION_DAYS * 24 * 60 * 60
+                response.set_cookie('session_id', session_id, max_age=max_age, httponly=True)
                 flash("Successfully logged in!", "success")
                 return response
             else:
@@ -130,11 +130,13 @@ def register():
             flash("Passwords do not match", "error")
             return redirect(url_for('register'))
         
+        hashed_password = generate_password_hash(password)
+        
         con = get_db()
         if con:
             try:
                 cur = con.cursor()
-                cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, password))
+                cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, hashed_password))
                 con.commit()
                 flash("You have been registered successfully", "success")
             except sqlite3.Error as e:
@@ -156,6 +158,14 @@ def profile():
         return render_template('profile.html')
     else:
         flash("Please log in to view your profile", "error")
+        return redirect(url_for('login'))
+    
+@app.route('/edit-address')
+def edit_address():
+    if 'user_id' in session:
+        return render_template('edit-address.html')
+    else:
+        flash('You need to login first', 'error')
         return redirect(url_for('login'))
 
 @app.route('/logout')
