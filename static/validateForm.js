@@ -1,22 +1,15 @@
 function validateForm() {
-    var label = document.getElementById("label").value;
-    var address = document.getElementById("address").value;
-    var city = document.getElementById("city").value;
-    var postal_code = document.getElementById("postal_code").value;
+    var label = document.getElementById('label').value;
+    var address = document.getElementById('address').value;
+    var city = document.getElementById('city').value;
+    var postalCode = document.getElementById('postal_code').value;
 
-    if (label.trim() === "" || address.trim() === "" || city.trim() === "" || postal_code.trim() === "") {
-        alert("Please fill in all fields.");
+    if (label === "" || address === "" || city === "" || postalCode === "") {
+        alert("All fields must be filled out");
         return false;
     }
     return true;
 }
-
-var addressData = {
-    label: "Home",
-    address: "123 Main St",
-    city: "Example City",
-    postal_code: "12345"
-};
 
 function displayAddress(address) {
     var addressInfoContainer = document.getElementById("address-info");

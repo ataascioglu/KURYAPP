@@ -29,6 +29,17 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(pid)
         )
     ''')
+    con.execute('''
+        CREATE TABLE IF NOT EXISTS addresses (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER,
+            label TEXT,
+            address TEXT,
+            city TEXT,
+            postal_code TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(pid)
+        )
+    ''')
     con.close()
 
 init_db()
@@ -155,18 +166,103 @@ def contact():
 @app.route('/profile')
 def profile():
     if 'user_id' in session:
-        return render_template('profile.html')
+        user_id = session['user_id']
+        
+        con = get_db()
+        addresses = []
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    SELECT label, address, city, postal_code
+                    FROM addresses
+                    WHERE user_id = ?
+                ''', (user_id,))
+                addresses = cur.fetchall()
+            except sqlite3.Error as e:
+                flash(f'Error fetching addresses: {e}', 'error')
+            finally:
+                con.close()
+        
+        return render_template('profile.html', addresses=addresses)
     else:
         flash("Please log in to view your profile", "error")
         return redirect(url_for('login'))
     
-@app.route('/edit-address')
-def edit_address():
+@app.route('/add-address', methods=['GET', 'POST'])
+def add_address():
     if 'user_id' in session:
-        return render_template('edit-address.html')
+        if request.method == 'POST':
+            user_id = session['user_id']
+            label = request.form['label']
+            address = request.form['address']
+            city = request.form['city']
+            postal_code = request.form['postal_code']
+            
+            con = get_db()
+            if con:
+                try:
+                    cur = con.cursor()
+                    cur.execute('''
+                        INSERT INTO addresses (user_id, label, address, city, postal_code)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (user_id, label, address, city, postal_code))
+                    con.commit()
+                    flash('Address added successfully', 'success')
+                except sqlite3.Error as e:
+                    flash(f'Error adding address: {e}', 'error')
+                finally:
+                    con.close()
+            return redirect(url_for('profile'))
+        
+        return render_template('add-address.html')
     else:
         flash('You need to login first', 'error')
         return redirect(url_for('login'))
+    
+    
+@app.route('/edit-address', methods=['GET', 'POST'])
+def edit_address(address_id):
+    if 'user_id' in session:
+        con = get_db()
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('SELECT * FROM addresses WHERE id = ?', (address_id,))
+                address = cur.fetchone()
+                if address:
+                    if request.method == 'POST':
+                        label = request.form['label']
+                        address = request.form['address']
+                        city = request.form['city']
+                        postal_code = request.form['postal_code']
+                        
+                        cur.execute('''
+                            UPDATE addresses
+                            SET label=?, address=?, city=?, postal_code=?
+                            WHERE id=?
+                        ''', (label, address, city, postal_code, address_id))
+                        con.commit()
+                        flash('Address updated successfully', 'success')
+                        return redirect(url_for('profile'))
+                    
+                    return render_template('edit-address.html', address=address)
+                else:
+                    flash('Address not found', 'error')
+                    return redirect(url_for('profile'))
+            except sqlite3.Error as e:
+                flash(f'Error fetching address: {e}', 'error')
+            finally:
+                con.close()
+        else:
+            flash('Database connection error', 'error')
+            return redirect(url_for('profile'))
+    else:
+        flash('You need to login first', 'error')
+        return redirect(url_for('login'))
+
+
+
 
 @app.route('/logout')
 def logout():

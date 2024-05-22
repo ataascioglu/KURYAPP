@@ -17,6 +17,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
             {% if 'user_id' in session %}
             <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
             <a class="type2" href="{{ url_for('logout') }}">Logout</a>
@@ -26,7 +27,6 @@
             {% endif %}
         </ul>
     </nav>
-    
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -37,20 +37,35 @@
                 </div>
             {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
+        {% block content %}
     </div>
-    
     <div class="border-container">
+        <br><br>
         <a class="type2" href="/add-address">Add Address</a> 
-        <a class="type2" href="/edit-address">Edit Address</a>
         <br><br>
         <div class="address-info-container">
             <h3>Address Information</h3>
-            <div id="address-info"></div>
+            <div id="address-info">
+                {% for address in addresses %}
+                    <div class="address-item">
+                        <a href="/edit-address">Edit</a>
+                        <div class="address-details">
+                            <p><strong>Label:</strong> {{ address[0] }}</p>
+                            <p><strong>Address:</strong> {{ address[1] }}</p>
+                            <p><strong>City:</strong> {{ address[2] }}</p>
+                            <p><strong>Postal Code:</strong> {{ address[3] }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No addresses found.</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
-    
-    <script src="/static/validateForm.js"></script>
+        {% endblock %}
+    </div>
+   
+        <script src="/static/validateForm.js"></script>
     <script src="/static/hideFlash.js"></script>
 </body>
 </html>
