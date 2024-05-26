@@ -35,34 +35,34 @@
             {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
-    </div>
-    
-    <div class="popup">
-        <section class="login-section">
-            <form class="form" method="post">
-                <h2>Login</h2>
-                <div class="form-element">
-                    <label class="label-password" for="email">Email:</label>
-                    <input type="text" name="email" id="email" placeholder="Enter your email" autocomplete="off" autofocus required>
-                </div>
-                <div class="form-element">
-                    <label class="label-password" for="password">Password:</label>
-                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
-                </div>
-                <div class="form-element">
-                    <label for="remember-me">
-                        <input type="checkbox" name="remember-me" id="remember-me">
-                        Remember Me
-                    </label>
-                </div>
-                <div class="form-element">
-                    <button class="sign-in-btn" type="submit">Sign In</button>
-                </div>
-                <div class="form-element">
-                    <a href="">Forgot your password?</a>
-                </div>
-            </form>
-        </section>
+        
+        <div class="popup">
+            <section class="login-section">
+                <form class="form" method="post">
+                    <h2>Login</h2>
+                    <div class="form-element">
+                        <label class="label-password" for="email">Email:</label>
+                        <input type="text" name="email" id="email" placeholder="Enter your email" autocomplete="off" autofocus required>
+                    </div>
+                    <div class="form-element">
+                        <label class="label-password" for="password">Password:</label>
+                        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="form-element">
+                        <label for="remember-me">
+                            <input type="checkbox" name="remember-me" id="remember-me">
+                            Remember Me
+                        </label>
+                    </div>
+                    <div class="form-element">
+                        <button class="sign-in-btn" type="submit">Sign In</button>
+                    </div>
+                    <div class="form-element">
+                        <a href="">Forgot your password?</a>
+                    </div>
+                </form>
+            </section>
+        </div>
     </div>
     <script src="/static/hideFlash.js"></script>
 </body>

@@ -13,14 +13,15 @@ SESSION_DURATION_DAYS = 7
 def init_db():
     con = sqlite3.connect('database.db')
     con.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            pid INTEGER PRIMARY KEY,
-            username TEXT,
-            email TEXT,
-            password TEXT
+    CREATE TABLE IF NOT EXISTS users (
+        pid INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL,
+        user_type TEXT NOT NULL
         )
     ''')
-    con.execute('''  
+    con.execute('''
         CREATE TABLE IF NOT EXISTS sessions (
             session_id TEXT PRIMARY KEY,
             user_id INTEGER,
@@ -77,18 +78,6 @@ def validate_session(session_id):
             if not expires_at or datetime.now(timezone.utc) < datetime.fromisoformat(expires_at).astimezone(timezone.utc):
                 return user_id
     return None
-
-def update_address(user_id, label, address, city, postal_code):
-    print(f"Updating address for user {user_id}: {label}, {address}, {city}, {postal_code}")
-    return True
-
-def get_address(address_id):
-    con = get_db()
-    cur = con.cursor()
-    cur.execute('SELECT * FROM addresses WHERE id = ?', (address_id,))
-    address = cur.fetchone()
-    con.close()
-    return address
 
 
 @app.before_request
@@ -148,6 +137,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm-password']
+        user_type = request.form['user-type']
         
         if password != confirm_password:
             flash("Passwords do not match", "error")
@@ -159,11 +149,12 @@ def register():
         if con:
             try:
                 cur = con.cursor()
-                cur.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, hashed_password))
+                cur.execute("INSERT INTO users (username, email, password, user_type) VALUES (?, ?, ?, ?)", 
+                            (username, email, hashed_password, user_type))
                 con.commit()
                 flash("You have been registered successfully", "success")
             except sqlite3.Error as e:
-                flash(f"Error in registration: {e}")
+                flash(f"Error in registration: {e}", "error")
             finally:
                 con.close()
         else:
@@ -186,7 +177,7 @@ def profile():
             try:
                 cur = con.cursor()
                 cur.execute('''
-                    SELECT label, address, city, postal_code
+                    SELECT label, address, city, postal_code, id
                     FROM addresses
                     WHERE user_id =?
                 ''', (user_id,))
@@ -242,15 +233,11 @@ def add_address():
 @app.route('/delete-address/<int:address_id>', methods=['POST'])
 def delete_address(address_id):
     if request.method == 'POST':
-        address = get_address(address_id)
-        if address:
-            con = get_db()
-            con.execute('DELETE FROM addresses WHERE id = ?', (address_id,))
-            con.commit()
-            con.close()
-            flash('Address was successfully deleted!'.format(address['label']), 'success')
-        else:
-            flash('Address not found', 'error')
+        con = get_db()
+        con.execute('DELETE FROM addresses WHERE id = ?', (address_id,))
+        con.commit()
+        con.close()
+        flash('Address was successfully deleted!', 'success')
     else:
         flash('Invalid request method', 'error')
 

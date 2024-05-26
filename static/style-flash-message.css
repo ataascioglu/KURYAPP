@@ -4,11 +4,13 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    margin: 10px 10px 10px auto;
     max-width: 250px;
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
     background-color: white;
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
 
 .flash-message.info { 
@@ -24,4 +26,7 @@
 .flash-message.success { 
     border-color: green;
     color: green; 
+}
+.container {
+    position: relative;
 }
