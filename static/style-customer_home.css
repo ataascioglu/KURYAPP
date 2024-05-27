@@ -1,0 +1,63 @@
+.box-container {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 30px;
+    width: 700px;
+}
+
+.tabs {
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: rgb(44,23,132);
+}
+
+.tab-button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    color: white;
+}
+
+.tab-button:hover {
+    background-color: darkgray;
+}
+
+.tab-button.active {
+    background-color: rgb(0, 0, 0);
+}
+
+.check-status-btn{
+    background-color: rgb(44, 23, 132);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 200ms;
+}
+.check-status-btn:hover{
+    background-color: rgb(23, 8, 92);
+}
+
+.create-shipment-btn{
+    background-color: rgb(44, 23, 132);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 200ms;
+}
+.create-shipment-btn:hover{
+    background-color: rgb(23, 8, 92);
+}

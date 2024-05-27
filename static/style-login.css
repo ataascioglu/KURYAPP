@@ -56,7 +56,7 @@ body {
     background-color: rgb(44, 23, 132);
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 200ms;
 }
 
 .popup .form .sign-in-btn:hover {

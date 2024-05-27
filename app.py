@@ -52,10 +52,10 @@ def init_db():
         recipient_name TEXT,
         recipient_address TEXT,
         status TEXT,
+        shipment_code TEXT,
         FOREIGN KEY(user_id) REFERENCES users(pid)
     )
-''')
-
+    ''')
     con.close()
 
 init_db()
@@ -152,7 +152,56 @@ def login():
 
 @app.route('/customer-home')
 def customer_home():
-    return render_template("customer_home.html")
+    if 'user_id' in session:
+        user_id = session['user_id']
+        
+        con = get_db()
+        addresses = []
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    SELECT label, address, city, postal_code, id
+                    FROM addresses
+                    WHERE user_id = ?
+                ''', (user_id,))
+                addresses = cur.fetchall()
+            except sqlite3.Error as e:
+                flash(f'Error fetching addresses: {e}', 'error')
+            finally:
+                con.close()
+        
+        return render_template("customer_home.html", addresses=addresses)
+    else:
+        flash("Please log in to access this page", "error")
+        return redirect(url_for('login'))
+    
+@app.route('/check-shipment-status', methods=['POST'])
+def check_shipment_status():
+    shipment_code = request.form['shipment_code']
+    con = get_db()
+    if con:
+        try:
+            cur = con.cursor()
+            cur.execute('''
+                SELECT sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                FROM shipments
+                WHERE shipment_code = ?
+            ''', (shipment_code,))
+            shipment_details = cur.fetchone()
+            if shipment_details:
+                flash('Shipment details retrieved successfully', 'success')
+                return render_template('customer_home.html', shipment_details=shipment_details)
+            else:
+                flash('Invalid shipment code or shipment not found', 'error')
+        except sqlite3.Error as e:
+            flash(f'Error checking shipment status: {e}', 'error')
+        finally:
+            con.close()
+    else:
+        flash('Failed to connect to the database', 'error')
+    return redirect(url_for('customer_home'))
+
 
 
 @app.route('/courier-home')
@@ -168,17 +217,19 @@ def create_shipment():
         recipient_name = request.form['recipient_name']
         recipient_address = request.form['recipient_address']
         status = "Pending"
-        
+
+        shipment_code = str(uuid.uuid4())
+
         con = get_db()
         if con:
             try:
                 cur = con.cursor()
                 cur.execute('''
-                    INSERT INTO shipments (user_id, sender_name, sender_address, recipient_name, recipient_address, status)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (user_id, sender_name, sender_address, recipient_name, recipient_address, status))
+                    INSERT INTO shipments (user_id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (user_id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code))
                 con.commit()
-                flash('Shipment created successfully', 'success')
+                flash(f'Shipment created successfully! Your shipment code is {shipment_code}', 'success')
             except sqlite3.Error as e:
                 flash(f'Shipment creation error: {e}', 'error')
             finally:
