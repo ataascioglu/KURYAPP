@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP</title>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/customer-home">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
+            {% if 'user_id' in session %}
+            <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+            <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a class="type1" href="/login">Login</a>
+                <a class="type2" href="/register">Register</a>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <h1>Welcome, Customer!</h1>
+    <p>This is the customer home page.</p>
+
+    <h2>Create Shipment</h2>
+    <form action="/create-shipment" method="post">
+        <label for="sender_name">Sender Name:</label>
+        <input type="text" id="sender_name" name="sender_name" required><br><br>
+        <label for="sender_address">Sender Address:</label>
+        <input type="text" id="sender_address" name="sender_address" required><br><br>
+        <label for="recipient_name">Recipient Name:</label>
+        <input type="text" id="recipient_name" name="recipient_name" required><br><br>
+        <label for="recipient_address">Recipient Address:</label>
+        <input type="text" id="recipient_address" name="recipient_address" required><br><br>
+        
+        <label for="box_size">Box Size:</label>
+        <select id="box_size" name="box_size">
+            <option value="s">Small</option>
+            <option value="m">Medium</option>
+            <option value="l">Large</option>
+        </select><br><br>
+        
+        <input type="submit" value="Create Shipment">
+    </form>   
+
+    <script src="/static/hideFlash.js"></script>
+</body>
+</html>

@@ -3,6 +3,8 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+import random
+import string
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -41,6 +43,19 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(pid)
         )
     ''')
+    con.execute('''
+    CREATE TABLE IF NOT EXISTS shipments (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        sender_name TEXT,
+        sender_address TEXT,
+        recipient_name TEXT,
+        recipient_address TEXT,
+        status TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(pid)
+    )
+''')
+
     con.close()
 
 init_db()
@@ -123,12 +138,57 @@ def login():
                 max_age = None if not remember_me else SESSION_DURATION_DAYS * 24 * 60 * 60
                 response.set_cookie('session_id', session_id, max_age=max_age, httponly=True)
                 flash("Successfully logged in!", "success")
+                if user[4] == "customer":
+                    response = make_response(redirect(url_for('customer_home')))
+                elif user[4] == "courier":
+                    response = make_response(redirect(url_for('courier_home')))
+                    
                 return response
             else:
                 flash("Invalid email or password", "error")
         else:
             flash("Failed to connect to the database", "error")
     return render_template("login.html")
+
+@app.route('/customer-home')
+def customer_home():
+    return render_template("customer_home.html")
+
+
+@app.route('/courier-home')
+def courier_home():
+    return render_template("courier_home.html")
+
+@app.route('/create-shipment', methods=['POST'])
+def create_shipment():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        sender_name = request.form['sender_name']
+        sender_address = request.form['sender_address']
+        recipient_name = request.form['recipient_name']
+        recipient_address = request.form['recipient_address']
+        status = "Pending"
+        
+        con = get_db()
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    INSERT INTO shipments (user_id, sender_name, sender_address, recipient_name, recipient_address, status)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (user_id, sender_name, sender_address, recipient_name, recipient_address, status))
+                con.commit()
+                flash('Shipment created successfully', 'success')
+            except sqlite3.Error as e:
+                flash(f'Shipment creation error: {e}', 'error')
+            finally:
+                con.close()
+        else:
+            flash('Failed to connect to the database', 'error')
+    else:
+        flash('You need to log in to create a shipment', 'error')
+    return redirect(url_for('customer_home'))
+
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():

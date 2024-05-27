@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP</title>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/courier-home">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
+            {% if 'user_id' in session %}
+            <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+            <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a class="type1" href="/login">Login</a>
+                <a class="type2" href="/register">Register</a>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <h1>Welcome, Courier!</h1>
+    <p>This is the courier home page.</p>
+    <script src="/static/hideFlash.js"></script>
+</body>
+</html>
+
