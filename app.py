@@ -302,8 +302,8 @@ def create_shipment():
         recipient_name = request.form['recipient_name']
         recipient_address = request.form['recipient_address']
         status = "Pending"
-
-        shipment_code = str(uuid.uuid4())
+        
+        shipment_code = str(uuid.uuid4().int)[:13]
 
         con = get_db()
         if con:
