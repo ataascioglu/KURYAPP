@@ -37,11 +37,85 @@
                 </div>
             {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
+        {% block content %}
+
+        <h2>Available Shipments</h2>
+        {% if available_shipments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Shipment Code</th>
+                    <th>Sender Name</th>
+                    <th>Sender Address</th>
+                    <th>Recipient Name</th>
+                    <th>Recipient Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipment in available_shipments %}
+                <tr>
+                    <td>{{ shipment[6] }}</td>
+                    <td>{{ shipment[1] }}</td>
+                    <td>{{ shipment[2] }}</td>
+                    <td>{{ shipment[3] }}</td>
+                    <td>{{ shipment[4] }}</td>
+                    <td>{{ shipment[5] }}</td>
+                    <td>
+                        {% if shipment[5] == 'Pending' %}
+                        <form action="{{ url_for('accept_shipment', shipment_id=shipment[0]) }}" method="POST">
+                            <button type="submit">Accept</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No available shipments at the moment.</p>
+        {% endif %}
+        
+        <h2>Accepted Shipments</h2>
+        {% if accepted_shipments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Shipment Code</th>
+                    <th>Sender Name</th>
+                    <th>Sender Address</th>
+                    <th>Recipient Name</th>
+                    <th>Recipient Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipment in accepted_shipments %}
+                <tr>
+                    <td>{{ shipment[6] }}</td>
+                    <td>{{ shipment[1] }}</td>
+                    <td>{{ shipment[2] }}</td>
+                    <td>{{ shipment[3] }}</td>
+                    <td>{{ shipment[4] }}</td>
+                    <td>{{ shipment[5] }}</td>
+                    <td>
+                        {% if shipment[5] == 'In Transit' %}
+                        <form action="{{ url_for('mark_delivered', shipment_id=shipment[0]) }}" method="POST">
+                            <button type="submit">Mark as Delivered</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No accepted shipments at the moment.</p>
+        {% endif %}
+        {% endblock %}
     </div>
-    <h1>Welcome, Courier!</h1>
-    <p>This is the courier home page.</p>
     <script src="/static/hideFlash.js"></script>
 </body>
 </html>
-

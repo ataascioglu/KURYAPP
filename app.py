@@ -3,14 +3,10 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-import random
-import string
-
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = "emauehjgk"
 SESSION_DURATION_DAYS = 7
-
 
 def init_db():
     con = sqlite3.connect('database.db')
@@ -47,13 +43,15 @@ def init_db():
     CREATE TABLE IF NOT EXISTS shipments (
         id INTEGER PRIMARY KEY,
         user_id INTEGER,
+        courier_id INTEGER,
         sender_name TEXT,
         sender_address TEXT,
         recipient_name TEXT,
         recipient_address TEXT,
         status TEXT,
         shipment_code TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(pid)
+        FOREIGN KEY(user_id) REFERENCES users(pid),
+        FOREIGN KEY(courier_id) REFERENCES users(pid)
     )
     ''')
     con.close()
@@ -94,7 +92,6 @@ def validate_session(session_id):
                 return user_id
     return None
 
-
 @app.before_request
 def load_logged_in_user():
     session_id = request.cookies.get('session_id')
@@ -105,14 +102,21 @@ def load_logged_in_user():
             con = get_db()
             if con:
                 cur = con.cursor()
-                cur.execute("SELECT username FROM users WHERE pid = ?", (user_id,))
+                cur.execute("SELECT username, user_type FROM users WHERE pid = ?", (user_id,))
                 user = cur.fetchone()
-                session['username'] = user[0] if user else None
+                if user:
+                    session['username'] = user[0]
+                    session['user_type'] = user[1]
                 con.close()
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    if 'user_id' in session:
+        if session.get('user_type') == 'customer':
+            return redirect(url_for('customer_home'))
+        elif session.get('user_type') == 'courier':
+            return redirect(url_for('courier_home'))
+    return render_template('index.html')
 
 @app.route('/about')
 def about():
@@ -134,15 +138,11 @@ def login():
                 session_id, expires_at = create_session(user[0], remember_me)
                 session['user_id'] = user[0]
                 session['username'] = user[1]
+                session['user_type'] = user[4]
                 response = make_response(redirect(url_for('home')))
                 max_age = None if not remember_me else SESSION_DURATION_DAYS * 24 * 60 * 60
                 response.set_cookie('session_id', session_id, max_age=max_age, httponly=True)
                 flash("Successfully logged in!", "success")
-                if user[4] == "customer":
-                    response = make_response(redirect(url_for('customer_home')))
-                elif user[4] == "courier":
-                    response = make_response(redirect(url_for('courier_home')))
-                    
                 return response
             else:
                 flash("Invalid email or password", "error")
@@ -175,7 +175,7 @@ def customer_home():
     else:
         flash("Please log in to access this page", "error")
         return redirect(url_for('login'))
-    
+
 @app.route('/check-shipment-status', methods=['POST'])
 def check_shipment_status():
     shipment_code = request.form['shipment_code']
@@ -202,11 +202,96 @@ def check_shipment_status():
         flash('Failed to connect to the database', 'error')
     return redirect(url_for('customer_home'))
 
-
-
 @app.route('/courier-home')
 def courier_home():
-    return render_template("courier_home.html")
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+        con = get_db()
+        available_shipments = []
+        accepted_shipments = []
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                    FROM shipments
+                    WHERE status = 'Pending'
+                ''')
+                available_shipments = cur.fetchall()
+                
+                cur.execute('''
+                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                    FROM shipments
+                    WHERE status = 'In Transit' AND courier_id = ?
+                ''', (user_id,))
+                accepted_shipments = cur.fetchall()
+            except sqlite3.Error as e:
+                flash(f'Error fetching shipments: {e}', 'error')
+            finally:
+                con.close()
+
+        return render_template("courier_home.html", available_shipments=available_shipments, accepted_shipments=accepted_shipments)
+    else:
+        flash("Please log in to access this page", "error")
+        return redirect(url_for('login'))
+
+@app.route('/accept-shipment/<int:shipment_id>', methods=['POST'])
+def accept_shipment(shipment_id):
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+        con = get_db()
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    UPDATE shipments
+                    SET status = 'In Transit', courier_id = ?
+                    WHERE id = ? AND status = 'Pending'
+                ''', (user_id, shipment_id))
+                if cur.rowcount == 0:
+                    flash('Failed to accept shipment. It may already be accepted by another courier.', 'error')
+                else:
+                    con.commit()
+                    flash('Shipment accepted successfully!', 'success')
+            except sqlite3.Error as e:
+                flash(f'Error accepting shipment: {e}', 'error')
+            finally:
+                con.close()
+    else:
+        flash('You need to log in to accept a shipment', 'error')
+
+    return redirect(url_for('courier_home'))
+
+
+@app.route('/mark-delivered/<int:shipment_id>', methods=['POST'])
+def mark_delivered(shipment_id):
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+        con = get_db()
+        if con:
+            try:
+                cur = con.cursor()
+                cur.execute('''
+                    UPDATE shipments
+                    SET status = 'Delivered'
+                    WHERE id = ? AND courier_id = ? AND status = 'In Transit'
+                ''', (shipment_id, user_id))
+                if cur.rowcount == 0:
+                    flash('Failed to mark shipment as delivered. It may already be marked as delivered or not accepted by you.', 'error')
+                else:
+                    con.commit()
+                    flash('Shipment marked as delivered successfully!', 'success')
+            except sqlite3.Error as e:
+                flash(f'Error marking shipment as delivered: {e}', 'error')
+            finally:
+                con.close()
+    else:
+        flash('You need to log in to mark a shipment as delivered', 'error')
+
+    return redirect(url_for('courier_home'))
 
 @app.route('/create-shipment', methods=['POST'])
 def create_shipment():
@@ -239,7 +324,6 @@ def create_shipment():
     else:
         flash('You need to log in to create a shipment', 'error')
     return redirect(url_for('customer_home'))
-
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -290,7 +374,7 @@ def profile():
                 cur.execute('''
                     SELECT label, address, city, postal_code, id
                     FROM addresses
-                    WHERE user_id =?
+                    WHERE user_id = ?
                 ''', (user_id,))
                 addresses = cur.fetchall()
             except sqlite3.Error as e:
@@ -304,9 +388,6 @@ def profile():
     else:
         flash("Please log in to view your profile", "error")
         return redirect(url_for('login'))
-
-
-    
 
 @app.route('/add-address', methods=['GET', 'POST'])
 def add_address():
@@ -338,8 +419,6 @@ def add_address():
     else:
         flash('You need to login first', 'error')
         return redirect(url_for('login'))
-    
-
 
 @app.route('/delete-address/<int:address_id>', methods=['POST'])
 def delete_address(address_id):
@@ -354,8 +433,6 @@ def delete_address(address_id):
 
     return redirect(url_for('profile'))
 
-
-
 @app.route('/logout')
 def logout():
     session_id = request.cookies.get('session_id')
@@ -368,11 +445,11 @@ def logout():
             con.close()
     session.pop('user_id', None)
     session.pop('username', None)
+    session.pop('user_type', None)
     response = make_response(redirect(url_for('home')))
     response.set_cookie('session_id', '', expires=0)
     flash("You have been logged out", "success")
     return response
-
 
 if __name__ == '__main__':
     app.run(debug=True)
