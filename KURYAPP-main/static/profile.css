@@ -1,0 +1,44 @@
+.container{
+  padding-top: 20px;
+}
+.border-container {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 20px; 
+  margin: auto;
+  max-width: 600px;
+  background-color: #f9f9f9;
+  font-family: Arial, Helvetica, sans-serif;
+}
+  
+.address-info-container {
+  margin-top: 20px;
+}
+
+h3 {
+  color: rgb(44, 23, 132);
+  margin-bottom: 10px;
+}
+
+.address-item {
+  position: relative;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  margin-bottom: 10px;
+}
+#delete-form{
+  position: absolute;
+  right: 10px;
+  top: 10px;  
+}
+#delete-form > button {
+  all: unset;
+  color: rgb(250, 67, 67);
+  cursor: pointer;
+  transition: color 200ms;
+}
+#delete-form > button:hover {
+  color: rgb(182, 5, 5);
+}

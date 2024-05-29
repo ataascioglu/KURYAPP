@@ -1,0 +1,68 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 450px;
+    padding: 20px 30px;
+    background: #fff;   
+    box-shadow: 2px 2px 5px 5px rgba(0, 0, 0, .15); 
+    border-radius: 5px;
+    transform: translate(-50%, -50%);
+}
+
+
+.popup .form {
+    margin-top: 20px;
+}
+
+.popup .form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: rgb(44, 23, 132);
+}
+
+.popup .form .form-element {
+    display: flex;
+    margin-bottom: 15px;
+    font-weight: bold;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.popup .form input[type="text"],
+.popup .form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+.popup .form .sign-in-btn {
+    padding: 10px 20px;
+    font-size: 15px;
+    border-radius: 10px;
+    color: white;
+    background-color: rgb(44, 23, 132);
+    border: none;
+    cursor: pointer;
+    transition: background-color 200ms;
+}
+
+.popup .form .sign-in-btn:hover {
+    background-color: rgb(23, 8, 92);
+}
+
+.label-password {
+    color: rgb(44, 23, 132);
+}

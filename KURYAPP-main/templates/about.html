@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-about.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP - About</title>
+
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+                <li><div class="vertical-line"></div></li>
+                {% if 'user_id' in session %}
+                <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+                <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="type1" href="/login">Login</a>
+                    <a class="type2" href="/register">Register</a>
+                {% endif %}
+            </ul>     
+    </nav>
+    <h1 class="about-us">About Us</h1>
+    <section class="about-section">
+        <div class="about-info">
+            <p> deneme deneme deneme deneme deneme deneme deneme deneme deneme deneme
+    </section>
+    
+    
+</body>
+</html>

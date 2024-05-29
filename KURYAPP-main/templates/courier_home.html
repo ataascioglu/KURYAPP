@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="stylesheet" href="/static/style-courier_home.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP</title>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
+            {% if 'user_id' in session %}
+            <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+            <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a class="type1" href="/login">Login</a>
+                <a class="type2" href="/register">Register</a>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+    </div>
+    <div class="box-container">
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'AvailableShipments')">Available Shipments</button>
+            <button class="tab-button" onclick="openTab(event, 'AcceptedShipments')">Accepted Shipments</button>
+        </div>
+    
+        <div id="AvailableShipments" class="tab-content">
+            <h2>Available Shipments</h2>
+            {% if addresses %}
+                {% if available_shipments %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shipment Code</th>
+                                <th>Sender Name</th>
+                                <th>Sender Address</th>
+                                <th>Recipient Name</th>
+                                <th>Recipient Address</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shipment in available_shipments %}
+                                <tr>
+                                    <td>{{ shipment[6] }}</td>
+                                    <td>{{ shipment[1] }}</td>
+                                    <td>{{ shipment[2] }}</td>
+                                    <td>{{ shipment[3] }}</td>
+                                    <td>{{ shipment[4] }}</td>
+                                    <td>{{ shipment[5] }}</td>
+                                    <td>
+                                        {% if shipment[5] == 'Pending' %}
+                                            <form action="{{ url_for('accept_shipment', shipment_id=shipment[0]) }}" method="POST">
+                                                <button class="accept_shipment-btn" type="submit">Accept</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No available shipments at the moment.</p>
+                {% endif %}
+            {% else %}
+                <p>You have no saved addresses. Please add an address in your <a href="/profile">profile</a> to accept shipments.</p>
+            {% endif %}
+        </div>      
+        
+        <div id="AcceptedShipments" class="tab-content" style="display:none;">
+            <h2>Accepted Shipments</h2>
+            {% if accepted_shipments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Shipment Code</th>
+                        <th>Sender Name</th>
+                        <th>Sender Address</th>
+                        <th>Recipient Name</th>
+                        <th>Recipient Address</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shipment in accepted_shipments %}
+                    <tr>
+                        <td>{{ shipment[6] }}</td>
+                        <td>{{ shipment[1] }}</td>
+                        <td>{{ shipment[2] }}</td>
+                        <td>{{ shipment[3] }}</td>
+                        <td>{{ shipment[4] }}</td>
+                        <td>{{ shipment[5] }}</td>
+                        <td>
+                            {% if shipment[5] == 'In Transit' %}
+                            <form action="{{ url_for('mark_delivered', shipment_id=shipment[0]) }}" method="POST">
+                                <button class="mark_delivered-btn" type="submit">Mark as Delivered</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No accepted shipments at the moment.</p>
+            {% endif %}
+        </div>
+        {% endblock %}
+    </div>
+     <div id='map'></div>
+        <script>
+          mapboxgl.accessToken = 'pk.eyJ1IjoiZXJ1ZXJ1IiwiYSI6ImNsd3JwYXliZTAzYWQycXEzMW1peTBteWsifQ.ChdRQfHW7vCRDcZBBL89sg';
+          var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11'
+          });
+        </script>
+    <script>
+
+        function openTab(evt, tabName) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+    </script>
+
+    <script src="/static/hideFlash.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="stylesheet" href="/static/style-customer_home.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>KURYAPP</title>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
+            {% if 'user_id' in session %}
+            <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+            <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a class="type1" href="/login">Login</a>
+                <a class="type2" href="/register">Register</a>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+        <div class="box-container">
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab(event, 'CheckStatus')">Check Shipment Status</button>
+            </div>
+
+            <div id="CheckStatus" class="tab-content">
+                <h2>Check Shipment Status</h2>
+                <form action="/check-shipment-status" method="post">
+                    <label for="shipment_code">Enter Shipment Code:</label>
+                    <input type="text" id="shipment_code" name="shipment_code" required><br><br>
+                    <button class="check-status-btn" type="submit">Check Status</button>
+                </form>
+                <div id="shipment-details">
+                    {% if shipment_details %}               
+                    <h3>Shipment Details</h3>
+                        <p><strong>Code: </strong>{{ shipment_details[5] }}</p>
+                        <p><strong>Sender Name:</strong> {{ shipment_details[0] }}</p>
+                        <p><strong>Sender Address:</strong> {{ shipment_details[1] }}</p>
+                        <p><strong>Recipient Name:</strong> {{ shipment_details[2] }}</p>
+                        <p><strong>Recipient Address:</strong> {{ shipment_details[3] }}</p>
+                        <p><strong>Status:</strong> {{ shipment_details[4] }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+    <img class="main-page-photo" src="/static/kuryapp-mainpage.png" alt="main-page-photo">
+    <script src="/static/hideFlash.js"></script>
+    <script>
+        function openTab(evt, tabName) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+    
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+    
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>

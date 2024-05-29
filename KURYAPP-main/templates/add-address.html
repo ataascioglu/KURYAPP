@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/add-address.css">
+    <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="icon" href="/static/favicon.png">
+    <title>Add Address</title>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/static/kuryapp.png" alt="Kuryapp Logo">
+        </a>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><div class="vertical-line"></div></li>
+            {% if 'user_id' in session %}
+            <a class="type1" href="/profile" name="username">{{ session['username'] }} </a>
+            <a class="type2" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a class="type1" href="/login">Login</a>
+                <a class="type2" href="/register">Register</a>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+        <div class="border-container">
+            {% for address in addresses %}
+            <div class="box">
+                <h2>{{ address.label }}</h2>
+                <p><strong>Address:</strong> {{ address.address }}</p>
+                <p><strong>City:</strong> {{ address.city }}</p>
+                <p><strong>Postal Code:</strong> {{ address.postal_code }}</p>
+            </div>
+            {% endfor %}{% endblock %}
+
+            <div class="box">
+                <h2>Add New Address</h2>
+                <form action="{{ url_for('add_address') }}" method="post" onsubmit="return validateForm()">
+                    <div class="form-element">
+                        <label for="label"><strong>Label:</strong></label>
+                        <input type="text" id="label" name="label" required><br><br>
+                    </div>
+                    <div class="form-element">
+                        <label for="address"><strong>Address:</strong></label>
+                        <textarea type="text" id="address" name="address" rows="2" required></textarea><br><br>
+                    </div>
+                    <div class="form-element">
+                        <label for="city"><strong>City:</strong></label>
+                        <input type="text" id="city" name="city" required><br><br>
+                    </div>
+                    <div class="form-element">    
+                        <label for="postal_code"><strong>Postal Code:</strong></label>
+                        <input type="text" id="postal_code" name="postal_code" required><br><br>
+                    </div>
+                    <div class="form-element">
+                        <button class="add-address-button" type="submit">Add Address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/hideFlash.js"></script>
+    <script src="/static/validateForm.js"></script>
+</body>
+</html>
