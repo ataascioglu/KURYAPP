@@ -43,7 +43,6 @@
             <div class="tabs">
                 <button class="tab-button active" onclick="openTab(event, 'CheckStatus')">Check Shipment Status</button>
             </div>
-
             <div id="CheckStatus" class="tab-content">
                 <h2>Check Shipment Status</h2>
                 <form action="/check-shipment-status" method="post">
@@ -66,7 +65,11 @@
         </div>
         {% endblock %}
     </div>
+    <img class="mainpage-bg" src="/static/mainpage-bg.png" alt="mainpage-bg">
     <img class="main-page-photo" src="/static/kuryapp-mainpage.png" alt="main-page-photo">
+    <a class="be-a-courier-btn" href='/register'>WOULD YOU LIKE TO BE OUR COURIER?</a>
+    <img class="mainpage-customer" src="/static/mainpage-customer.png" alt="mainpage-customer">
+    <a class="be-a-customer-btn" href='/register'>WOULD YOU LIKE TO BE OUR CUSTOMER?</a>
     <script src="/static/hideFlash.js"></script>
     <script>
         function openTab(evt, tabName) {

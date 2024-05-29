@@ -15,10 +15,18 @@
 }
 
 .about-info{
-    display: flex;
+    position: absolute;
+    top: 250px;
+    background-color: white;
     gap: 20px;
     flex-wrap: wrap;
-    border: 1px rgb(44, 23, 132) solid;
     border-radius: 10px;
     padding: 50px;
+}
+
+.about-img{
+    position: absolute;
+    top: 200px;
+    right: 300px;
+    border-radius: 10px;
 }
