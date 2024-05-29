@@ -15,7 +15,7 @@
             <img src="/static/kuryapp.png" alt="Kuryapp Logo">
         </a>
         <ul>
-            <li><a href="/courier-home">Home</a></li>
+            <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/contact">Contact</a></li>
             <li><div class="vertical-line"></div></li>
@@ -45,47 +45,51 @@
             <button class="tab-button active" onclick="openTab(event, 'AvailableShipments')">Available Shipments</button>
             <button class="tab-button" onclick="openTab(event, 'AcceptedShipments')">Accepted Shipments</button>
         </div>
-
+    
         <div id="AvailableShipments" class="tab-content">
             <h2>Available Shipments</h2>
-            {% if available_shipments %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Shipment Code</th>
-                        <th>Sender Name</th>
-                        <th>Sender Address</th>
-                        <th>Recipient Name</th>
-                        <th>Recipient Address</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for shipment in available_shipments %}
-                    <tr>
-                        <td>{{ shipment[6] }}</td>
-                        <td>{{ shipment[1] }}</td>
-                        <td>{{ shipment[2] }}</td>
-                        <td>{{ shipment[3] }}</td>
-                        <td>{{ shipment[4] }}</td>
-                        <td>{{ shipment[5] }}</td>
-                        <td>
-                            {% if shipment[5] == 'Pending' %}
-                            <form action="{{ url_for('accept_shipment', shipment_id=shipment[0]) }}" method="POST">
-                                <button class="accept_shipment-btn" type="submit">Accept</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% if addresses %}
+                {% if available_shipments %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shipment Code</th>
+                                <th>Sender Name</th>
+                                <th>Sender Address</th>
+                                <th>Recipient Name</th>
+                                <th>Recipient Address</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shipment in available_shipments %}
+                                <tr>
+                                    <td>{{ shipment[6] }}</td>
+                                    <td>{{ shipment[1] }}</td>
+                                    <td>{{ shipment[2] }}</td>
+                                    <td>{{ shipment[3] }}</td>
+                                    <td>{{ shipment[4] }}</td>
+                                    <td>{{ shipment[5] }}</td>
+                                    <td>
+                                        {% if shipment[5] == 'Pending' %}
+                                            <form action="{{ url_for('accept_shipment', shipment_id=shipment[0]) }}" method="POST">
+                                                <button class="accept_shipment-btn" type="submit">Accept</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No available shipments at the moment.</p>
+                {% endif %}
             {% else %}
-            <p>No available shipments at the moment.</p>
+                <p>You have no saved addresses. Please add an address in your <a href="/profile">profile</a> to accept shipments.</p>
             {% endif %}
-        </div>
-
+        </div>      
+        
         <div id="AcceptedShipments" class="tab-content" style="display:none;">
             <h2>Accepted Shipments</h2>
             {% if accepted_shipments %}

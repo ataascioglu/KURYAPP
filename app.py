@@ -208,33 +208,47 @@ def courier_home():
         user_id = session['user_id']
 
         con = get_db()
+        addresses = []
         available_shipments = []
         accepted_shipments = []
+
         if con:
             try:
                 cur = con.cursor()
                 cur.execute('''
-                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
-                    FROM shipments
-                    WHERE status = 'Pending'
-                ''')
-                available_shipments = cur.fetchall()
-                
-                cur.execute('''
-                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
-                    FROM shipments
-                    WHERE status = 'In Transit' AND courier_id = ?
+                    SELECT label, address, city, postal_code, id
+                    FROM addresses
+                    WHERE user_id = ?
                 ''', (user_id,))
-                accepted_shipments = cur.fetchall()
+                addresses = cur.fetchall()
+
+                if addresses:
+                    cur.execute('''
+                        SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                        FROM shipments
+                        WHERE status = 'Pending'
+                    ''')
+                    available_shipments = cur.fetchall()
+
+                    cur.execute('''
+                        SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                        FROM shipments
+                        WHERE status = 'In Transit' AND courier_id = ?
+                    ''', (user_id,))
+                    accepted_shipments = cur.fetchall()
+                else:
+                    flash("You have no saved addresses. Please add an address in your profile to accept shipments.", "error")
+
             except sqlite3.Error as e:
-                flash(f'Error fetching shipments: {e}', 'error')
+                flash(f'Error fetching data: {e}', 'error')
             finally:
                 con.close()
 
-        return render_template("courier_home.html", available_shipments=available_shipments, accepted_shipments=accepted_shipments)
+        return render_template("courier_home.html", addresses=addresses, available_shipments=available_shipments, accepted_shipments=accepted_shipments)
     else:
         flash("Please log in to access this page", "error")
         return redirect(url_for('login'))
+
 
 @app.route('/accept-shipment/<int:shipment_id>', methods=['POST'])
 def accept_shipment(shipment_id):

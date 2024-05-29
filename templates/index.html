@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/style-flash-message.css">
+    <link rel="stylesheet" href="/static/style-customer_home.css">
     <link rel="icon" href="/static/favicon.png">
     <title>KURYAPP</title>
 </head>
@@ -37,8 +38,51 @@
                 </div>
             {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
+        {% block content %}
+        <div class="box-container">
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab(event, 'CheckStatus')">Check Shipment Status</button>
+            </div>
+
+            <div id="CheckStatus" class="tab-content">
+                <h2>Check Shipment Status</h2>
+                <form action="/check-shipment-status" method="post">
+                    <label for="shipment_code">Enter Shipment Code:</label>
+                    <input type="text" id="shipment_code" name="shipment_code" required><br><br>
+                    <button class="check-status-btn" type="submit">Check Status</button>
+                </form>
+                <div id="shipment-details">
+                    {% if shipment_details %}               
+                    <h3>Shipment Details</h3>
+                        <p><strong>Code: </strong>{{ shipment_details[5] }}</p>
+                        <p><strong>Sender Name:</strong> {{ shipment_details[0] }}</p>
+                        <p><strong>Sender Address:</strong> {{ shipment_details[1] }}</p>
+                        <p><strong>Recipient Name:</strong> {{ shipment_details[2] }}</p>
+                        <p><strong>Recipient Address:</strong> {{ shipment_details[3] }}</p>
+                        <p><strong>Status:</strong> {{ shipment_details[4] }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endblock %}
     </div>
+    <img class="main-page-photo" src="/static/kuryapp-mainpage.png" alt="main-page-photo">
     <script src="/static/hideFlash.js"></script>
+    <script>
+        function openTab(evt, tabName) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+    
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+    
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
 </body>
 </html>

@@ -80,3 +80,9 @@ li{
     margin: -20px 0px;
     box-sizing: border-box;
 }
+
+.main-page-photo{
+    position: absolute;
+    transform: translate(220%, 5%);
+
+}
