@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
@@ -10,6 +14,7 @@
     <title>KURYAPP</title>
 </head>
 <body>
+
     <nav class="navbar">
         <a href="/" class="logo">
             <img src="/static/kuryapp.png" alt="Kuryapp Logo">
@@ -131,8 +136,16 @@
         </div>
         {% endblock %}
     </div>
-    
+     <div id='map'></div>
+        <script>
+          mapboxgl.accessToken = 'pk.eyJ1IjoiZXJ1ZXJ1IiwiYSI6ImNsd3JwYXliZTAzYWQycXEzMW1peTBteWsifQ.ChdRQfHW7vCRDcZBBL89sg';
+          var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11'
+          });
+        </script>
     <script>
+
         function openTab(evt, tabName) {
             var tabContents = document.getElementsByClassName("tab-content");
             for (var i = 0; i < tabContents.length; i++) {
@@ -147,7 +160,10 @@
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
         }
+
     </script>
+
     <script src="/static/hideFlash.js"></script>
+
 </body>
 </html>
