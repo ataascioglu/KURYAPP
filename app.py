@@ -214,51 +214,57 @@ def check_shipment_status():
 
 @app.route('/courier-home')
 def courier_home():
-    if 'user_id' in session:
-        user_id = session['user_id']
-
-        con = get_db()
-        addresses = []
-        available_shipments = []
-        accepted_shipments = []
-
-        if con:
-            try:
-                cur = con.cursor()
-                cur.execute('''
-                    SELECT label, address, city, postal_code, id
-                    FROM addresses
-                    WHERE user_id = ?
-                ''', (user_id,))
-                addresses = cur.fetchall()
-
-                if addresses:
-                    cur.execute('''
-                        SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
-                        FROM shipments
-                        WHERE status = 'Pending'
-                    ''')
-                    available_shipments = cur.fetchall()
-
-                    cur.execute('''
-                        SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
-                        FROM shipments
-                        WHERE status = 'In Transit' AND courier_id = ?
-                    ''', (user_id,))
-                    accepted_shipments = cur.fetchall()
-                else:
-                    flash("You have no saved addresses. Please add an address in your profile to accept shipments.", "error")
-
-            except sqlite3.Error as e:
-                flash(f'Error fetching data: {e}', 'error')
-            finally:
-                con.close()
-
-        return render_template("courier_home.html", addresses=addresses, available_shipments=available_shipments, accepted_shipments=accepted_shipments)
-    else:
+    if 'user_id' not in session:
         flash("Please log in to access this page", "error")
         return redirect(url_for('login'))
 
+    user_id = session['user_id']
+    con = get_db()
+    addresses = []
+    available_shipments = []
+    accepted_shipments = []
+    in_transit_shipments = []
+
+    if con:
+        try:
+            cur = con.cursor()
+            cur.execute('''
+                SELECT label, address, city, postal_code, id
+                FROM addresses
+                WHERE user_id = ?
+            ''', (user_id,))
+            addresses = cur.fetchall()
+
+            if addresses:
+                cur.execute('''
+                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                    FROM shipments
+                    WHERE status = 'Pending'
+                ''')
+                available_shipments = cur.fetchall()
+
+                cur.execute('''
+                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                    FROM shipments
+                    WHERE courier_id = ? AND status = 'Accepted by Courier'
+                ''', (user_id,))
+                accepted_shipments = cur.fetchall()
+
+                cur.execute('''
+                    SELECT id, sender_name, sender_address, recipient_name, recipient_address, status, shipment_code
+                    FROM shipments
+                    WHERE courier_id = ? AND status = 'In Transit'
+                ''', (user_id,))
+                in_transit_shipments = cur.fetchall()
+            else:
+                flash("You have no saved addresses. Please add an address in your profile to accept shipments.", "error")
+
+        except sqlite3.Error as e:
+            flash(f'Error fetching data: {e}', 'error')
+        finally:
+            con.close()
+
+    return render_template("courier_home.html", addresses=addresses, available_shipments=available_shipments, accepted_shipments=accepted_shipments, in_transit_shipments=in_transit_shipments)
 
 @app.route('/accept-shipment/<int:shipment_id>', methods=['POST'])
 def accept_shipment(shipment_id):
@@ -271,14 +277,14 @@ def accept_shipment(shipment_id):
                 cur = con.cursor()
                 cur.execute('''
                     UPDATE shipments
-                    SET status = 'In Transit', courier_id = ?
+                    SET status = 'Accepted by Courier', courier_id = ?
                     WHERE id = ? AND status = 'Pending'
                 ''', (user_id, shipment_id))
                 if cur.rowcount == 0:
                     flash('Failed to accept shipment. It may already be accepted by another courier.', 'error')
                 else:
                     con.commit()
-                    flash('Shipment accepted successfully!', 'success')
+                    flash('Shipment accepted successfully! Please go to the customer to pick up the cargo.', 'success')
             except sqlite3.Error as e:
                 flash(f'Error accepting shipment: {e}', 'error')
             finally:
@@ -288,32 +294,59 @@ def accept_shipment(shipment_id):
 
     return redirect(url_for('courier_home'))
 
+@app.route('/pick-up-shipment/<int:shipment_id>', methods=['POST'])
+def pick_up_shipment(shipment_id):
+    if 'user_id' not in session:
+        flash('You need to log in to update the shipment status', 'error')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    con = get_db()
+    if con:
+        try:
+            cur = con.cursor()
+            cur.execute('''
+                UPDATE shipments
+                SET status = 'In Transit'
+                WHERE id = ? AND courier_id = ? AND status = 'Accepted by Courier'
+            ''', (shipment_id, user_id))
+            if cur.rowcount == 0:
+                flash('Failed to update shipment status. It may already be picked up or not accepted.', 'error')
+            else:
+                con.commit()
+                flash('Shipment status updated to In Transit successfully!', 'success')
+        except sqlite3.Error as e:
+            flash(f'Error updating shipment status: {e}', 'error')
+        finally:
+            con.close()
+
+    return redirect(url_for('courier_home'))
 
 @app.route('/mark-delivered/<int:shipment_id>', methods=['POST'])
 def mark_delivered(shipment_id):
-    if 'user_id' in session:
-        user_id = session['user_id']
+    if 'user_id' not in session:
+        flash('You need to log in to update the shipment status', 'error')
+        return redirect(url_for('login'))
 
-        con = get_db()
-        if con:
-            try:
-                cur = con.cursor()
-                cur.execute('''
-                    UPDATE shipments
-                    SET status = 'Delivered'
-                    WHERE id = ? AND courier_id = ? AND status = 'In Transit'
-                ''', (shipment_id, user_id))
-                if cur.rowcount == 0:
-                    flash('Failed to mark shipment as delivered. It may already be marked as delivered or not accepted by you.', 'error')
-                else:
-                    con.commit()
-                    flash('Shipment marked as delivered successfully!', 'success')
-            except sqlite3.Error as e:
-                flash(f'Error marking shipment as delivered: {e}', 'error')
-            finally:
-                con.close()
-    else:
-        flash('You need to log in to mark a shipment as delivered', 'error')
+    user_id = session['user_id']
+    con = get_db()
+    if con:
+        try:
+            cur = con.cursor()
+            cur.execute('''
+                UPDATE shipments
+                SET status = 'Delivered'
+                WHERE id = ? AND courier_id = ? AND status = 'In Transit'
+            ''', (shipment_id, user_id))
+            if cur.rowcount == 0:
+                flash('Failed to update shipment status. It may already be delivered or not in transit.', 'error')
+            else:
+                con.commit()
+                flash('Shipment marked as delivered successfully!', 'success')
+        except sqlite3.Error as e:
+            flash(f'Error updating shipment status: {e}', 'error')
+        finally:
+            con.close()
 
     return redirect(url_for('courier_home'))
 

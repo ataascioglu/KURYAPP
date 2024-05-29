@@ -3,8 +3,6 @@
 <head>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
@@ -14,7 +12,6 @@
     <title>KURYAPP</title>
 </head>
 <body>
-
     <nav class="navbar">
         <a href="/" class="logo">
             <img src="/static/kuryapp.png" alt="Kuryapp Logo">
@@ -49,6 +46,7 @@
         <div class="tabs">
             <button class="tab-button active" onclick="openTab(event, 'AvailableShipments')">Available Shipments</button>
             <button class="tab-button" onclick="openTab(event, 'AcceptedShipments')">Accepted Shipments</button>
+            <button class="tab-button" onclick="openTab(event, 'InTransitShipments')">In Transit Shipments</button>
         </div>
     
         <div id="AvailableShipments" class="tab-content">
@@ -93,7 +91,7 @@
             {% else %}
                 <p>You have no saved addresses. Please add an address in your <a href="/profile">profile</a> to accept shipments.</p>
             {% endif %}
-        </div>      
+        </div>
         
         <div id="AcceptedShipments" class="tab-content" style="display:none;">
             <h2>Accepted Shipments</h2>
@@ -120,9 +118,9 @@
                         <td>{{ shipment[4] }}</td>
                         <td>{{ shipment[5] }}</td>
                         <td>
-                            {% if shipment[5] == 'In Transit' %}
-                            <form action="{{ url_for('mark_delivered', shipment_id=shipment[0]) }}" method="POST">
-                                <button class="mark_delivered-btn" type="submit">Mark as Delivered</button>
+                            {% if shipment[5] == 'Accepted by Courier' %}
+                            <form action="{{ url_for('pick_up_shipment', shipment_id=shipment[0]) }}" method="POST">
+                                <button class="got_cargo-btn" type="submit">Got the Cargo</button>
                             </form>
                             {% endif %}
                         </td>
@@ -134,36 +132,76 @@
             <p>No accepted shipments at the moment.</p>
             {% endif %}
         </div>
-        {% endblock %}
-    </div>
-     <div id='map'></div>
-        <script>
-          mapboxgl.accessToken = 'pk.eyJ1IjoiZXJ1ZXJ1IiwiYSI6ImNsd3JwYXliZTAzYWQycXEzMW1peTBteWsifQ.ChdRQfHW7vCRDcZBBL89sg';
-          var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11'
-          });
-        </script>
+
+        <div id="InTransitShipments" class="tab-content" style="display:none;">
+            <h2>In Transit Shipments</h2>
+            {% if in_transit_shipments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Shipment Code</th>
+                        <th>Sender Name</th>
+                        <th>Sender Address</th>
+                        <th>Recipient Name</th>
+                        <th>Recipient Address</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for shipment in in_transit_shipments %}
+                    <tr>
+                        <td>{{ shipment[6] }}</td>
+                        <td>{{ shipment[1] }}</td>
+                        <td>{{ shipment[2] }}</td>
+                        <td>{{ shipment[3] }}</td>
+                        <td>{{ shipment[4] }}</td>
+                        <td>{{ shipment[5] }}</td>
+                        <td>
+                            <form action="{{ url_for('mark_delivered', shipment_id=shipment[0]) }}" method="POST">
+                                <button class="mark_delivered-btn" type="submit">Mark as Delivered</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No in-transit shipments at the moment.</p>
+            {% endif %}{% endblock %}
+        </div>
+        
+    </div>        
+    <div id="map"></div>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
     <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZXJ1ZXJ1IiwiYSI6ImNsd3JwYXliZTAzYWQycXEzMW1peTBteWsifQ.ChdRQfHW7vCRDcZBBL89sg';
 
-        function openTab(evt, tabName) {
-            var tabContents = document.getElementsByClassName("tab-content");
-            for (var i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = "none";
-            }
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [28.9784, 41.0082],
+            zoom: 10
+        });
 
-            var tabButtons = document.getElementsByClassName("tab-button");
-            for (var i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
-            }
-
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
+        var customerAddress = "{{ session.get('recipient_address', '') }}";
+        if (customerAddress) {
+            fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(customerAddress)}.json?access_token=${mapboxgl.accessToken}`)
+            .then(response => response.json())
+            .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        var coords = data.features[0].center;
+                        map.flyTo({center: coords});
+                        new mapboxgl.Marker()
+                        .setLngLat(coords)
+                        .addTo(map);
+                    }
+                })
+            .catch(error => console.error('Error:', error));
         }
-
     </script>
 
     <script src="/static/hideFlash.js"></script>
-
 </body>
 </html>

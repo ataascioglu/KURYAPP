@@ -8,7 +8,7 @@
     margin-top: 20px;
     font-family: Arial, Helvetica, sans-serif;
     margin: 30px;
-    width: 600px;
+    width: 900px;
 }
 
 .tabs {
@@ -51,6 +51,20 @@
     background-color: rgb(23, 8, 92);
 }
 
+.got_cargo-btn {
+    background-color: rgb(44, 23, 132);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 200ms;
+}
+
+.got_cargo-btn:hover {
+    background-color: rgb(23, 8, 92);
+}
+
 .mark_delivered-btn {
     background-color: rgb(44, 23, 132);
     color: white;
@@ -64,9 +78,12 @@
 .mark_delivered-btn:hover {
     background-color: rgb(23, 8, 92);
 }
+
 #map {
-    display: block;
-    transform: translate(200%, 15%);
+    position: absolute;
+    border-radius: 10px;
+    top: 230px;
+    right: 150px;
     height: 500px;
     width: 475px;
 }
