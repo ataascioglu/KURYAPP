@@ -178,6 +178,10 @@ def customer_home():
 
 @app.route('/check-shipment-status', methods=['POST'])
 def check_shipment_status():
+    session_id = request.cookies.get('session_id')
+    user_id = None
+    if session_id:
+        user_id = validate_session(session_id)
     shipment_code = request.form['shipment_code']
     con = get_db()
     if con:
@@ -191,7 +195,10 @@ def check_shipment_status():
             shipment_details = cur.fetchone()
             if shipment_details:
                 flash('Shipment details retrieved successfully', 'success')
-                return render_template('customer_home.html', shipment_details=shipment_details)
+                if user_id:
+                    return render_template('customer_home.html', shipment_details=shipment_details)
+                else:
+                    return render_template('index.html', shipment_details=shipment_details)
             else:
                 flash('Invalid shipment code or shipment not found', 'error')
         except sqlite3.Error as e:
@@ -200,7 +207,10 @@ def check_shipment_status():
             con.close()
     else:
         flash('Failed to connect to the database', 'error')
-    return redirect(url_for('customer_home'))
+    if user_id:
+        return redirect(url_for('customer_home'))
+    else:
+        return redirect(url_for('home'))
 
 @app.route('/courier-home')
 def courier_home():
