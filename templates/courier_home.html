@@ -3,6 +3,8 @@
 <head>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.3.1/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.3.1/mapbox-gl-directions.css" type="text/css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/styles.css">
@@ -178,28 +180,23 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiZXJ1ZXJ1IiwiYSI6ImNsd3JwYXliZTAzYWQycXEzMW1peTBteWsifQ.ChdRQfHW7vCRDcZBBL89sg';
 
-        var map = new mapboxgl.Map({
+        
+        const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [28.9784, 41.0082],
             zoom: 10
+        })
+        const nav = new mapboxgl.NavigationControl();
+        map.addControl(nav);
+
+        var directions = new MapboxDirections({
+            accessToken: mapboxgl.accessToken
         });
 
-        var customerAddress = "{{ session.get('recipient_address', '') }}";
-        if (customerAddress) {
-            fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(customerAddress)}.json?access_token=${mapboxgl.accessToken}`)
-            .then(response => response.json())
-            .then(data => {
-                    if (data.features && data.features.length > 0) {
-                        var coords = data.features[0].center;
-                        map.flyTo({center: coords});
-                        new mapboxgl.Marker()
-                        .setLngLat(coords)
-                        .addTo(map);
-                    }
-                })
-            .catch(error => console.error('Error:', error));
-        }
+        map.addControl(directions, 'top-left');
+        
+
     </script>
     <script>
         function openTab(evt, tabId) {

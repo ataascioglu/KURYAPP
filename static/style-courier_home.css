@@ -1,7 +1,7 @@
 .box-container {
     position: absolute;
     top: 200px;
-    left: 150px;
+    left: 100px;
     background-color: white;
     border-radius: 10px;
     padding: 20px;
@@ -83,7 +83,7 @@
     position: absolute;
     border-radius: 10px;
     top: 230px;
-    right: 150px;
-    height: 500px;
-    width: 475px;
+    right: 200px;
+    height: 600px;
+    width: 575px;
 }

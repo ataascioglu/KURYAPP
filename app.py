@@ -207,7 +207,7 @@ def check_shipment_status():
             con.close()
     else:
         flash('Failed to connect to the database', 'error')
-    if user_id:
+    if user_id and session.get('user_type') == 'customer':
         return redirect(url_for('customer_home'))
     else:
         return redirect(url_for('home'))
