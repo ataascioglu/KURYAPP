@@ -1,15 +1,32 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
 .box-container {
-    position: absolute;
-    top: 200px;
-    left: 100px;
+    display: grid;
     background-color: white;
     border-radius: 10px;
     padding: 20px;
-    margin-top: 20px;
     font-family: Arial, Helvetica, sans-serif;
-    margin: 30px;
-    width: 900px;
+    width: 40%;
+    margin-top: 30px;
+    margin-left: 50px;
+    margin-right: 40px;
+
 }
+
+#map {
+    position: fixed;
+    top: 15%;
+    right: 50px;
+    border-radius: 10px;
+    height: 680px;
+    width: 590px;
+    margin-left: 0px;
+}
+
 
 .tabs {
     border-radius: 10px;
@@ -79,11 +96,36 @@
     background-color: rgb(23, 8, 92);
 }
 
-#map {
-    position: absolute;
+/* Table styles for vertical layout */
+.table-vertical td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: large;
+    margin-top: 10px;
+}
+
+.table-vertical th {
+    display: none;
+}
+
+.table-vertical tr {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
     border-radius: 10px;
-    top: 230px;
-    right: 200px;
-    height: 600px;
-    width: 575px;
+    padding: 10px;
+}
+
+.table-vertical {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-vertical td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color:#333;
 }

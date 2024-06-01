@@ -1,27 +1,25 @@
-.about-us{
+.about-us {
     padding-left: 50px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: 700;
     color: rgb(44, 23, 132);
 }
 
-.about-section{
+.about-section {
     display: flex;
-    flex-grow: 1;    
+    flex-wrap: wrap;
     gap: 3%;
     align-items: center;
     margin-inline: 20px;
     padding-left: 80px;
 }
 
-.about-info{
-    position: absolute;
-    width: 900px;
-    top: 250px;
+.about-info {
+    flex: 1; /* Take remaining space */
+    max-width: 50%; /* Limit width if needed */
     background-color: white;
     padding: 20px;
     gap: 20px;
-    flex-wrap: wrap;
     border-radius: 10px;
 }
 
@@ -29,9 +27,12 @@
     font-family: Arial, sans-serif;
 }
 
-.about-img{
-    position: absolute;
-    top: 200px;
-    right: 300px;
+.about-img {
+    display: flex;
     border-radius: 10px;
+    flex: 1;
+    margin-left: auto;
+    margin-right: 8%;
+    margin-top: -40vh;
+    transform: translateY(-20px);
 }

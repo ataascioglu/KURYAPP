@@ -55,7 +55,7 @@
             <h2>Available Shipments</h2>
             {% if addresses %}
                 {% if available_shipments %}
-                    <table>
+                    <table class="table-vertical">
                         <thead>
                             <tr>
                                 <th>Shipment Code</th>
@@ -70,13 +70,13 @@
                         <tbody>
                             {% for shipment in available_shipments %}
                                 <tr>
-                                    <td>{{ shipment[6] }}</td>
-                                    <td>{{ shipment[1] }}</td>
-                                    <td>{{ shipment[2] }}</td>
-                                    <td>{{ shipment[3] }}</td>
-                                    <td>{{ shipment[4] }}</td>
-                                    <td>{{ shipment[5] }}</td>
-                                    <td>
+                                    <td data-label="Shipment Code">{{ shipment[6] }}</td>
+                                    <td data-label="Sender Name">{{ shipment[1] }}</td>
+                                    <td data-label="Sender Address">{{ shipment[2] }}</td>
+                                    <td data-label="Recipient Name">{{ shipment[3] }}</td>
+                                    <td data-label="Recipient Address">{{ shipment[4] }}</td>
+                                    <td data-label="Status">{{ shipment[5] }}</td>
+                                    <td data-label="Action">
                                         {% if shipment[5] == 'Pending' %}
                                             <form action="{{ url_for('accept_shipment', shipment_id=shipment[0]) }}" method="POST">
                                                 <button class="accept_shipment-btn" type="submit">Accept</button>
@@ -98,7 +98,7 @@
         <div id="AcceptedShipments" class="tab-content" style="display:none;">
             <h2>Accepted Shipments</h2>
             {% if accepted_shipments %}
-            <table>
+            <table class="table-vertical">
                 <thead>
                     <tr>
                         <th>Shipment Code</th>
@@ -113,13 +113,13 @@
                 <tbody>
                     {% for shipment in accepted_shipments %}
                     <tr>
-                        <td>{{ shipment[6] }}</td>
-                        <td>{{ shipment[1] }}</td>
-                        <td>{{ shipment[2] }}</td>
-                        <td>{{ shipment[3] }}</td>
-                        <td>{{ shipment[4] }}</td>
-                        <td>{{ shipment[5] }}</td>
-                        <td>
+                        <td data-label="Shipment Code">{{ shipment[6] }}</td>
+                        <td data-label="Sender Name">{{ shipment[1] }}</td>
+                        <td data-label="Sender Address">{{ shipment[2] }}</td>
+                        <td data-label="Recipient Name">{{ shipment[3] }}</td>
+                        <td data-label="Recipient Address">{{ shipment[4] }}</td>
+                        <td data-label="Status">{{ shipment[5] }}</td>
+                        <td data-label="Action">
                             {% if shipment[5] == 'Accepted by Courier' %}
                             <form action="{{ url_for('pick_up_shipment', shipment_id=shipment[0]) }}" method="POST">
                                 <button class="got_cargo-btn" type="submit">Got the Cargo</button>
@@ -138,7 +138,7 @@
         <div id="InTransitShipments" class="tab-content" style="display:none;">
             <h2>In Transit Shipments</h2>
             {% if in_transit_shipments %}
-            <table>
+            <table class="table-vertical">
                 <thead>
                     <tr>
                         <th>Shipment Code</th>
@@ -153,13 +153,13 @@
                 <tbody>
                     {% for shipment in in_transit_shipments %}
                     <tr>
-                        <td>{{ shipment[6] }}</td>
-                        <td>{{ shipment[1] }}</td>
-                        <td>{{ shipment[2] }}</td>
-                        <td>{{ shipment[3] }}</td>
-                        <td>{{ shipment[4] }}</td>
-                        <td>{{ shipment[5] }}</td>
-                        <td>
+                        <td data-label="Shipment Code">{{ shipment[6] }}</td>
+                        <td data-label="Sender Name">{{ shipment[1] }}</td>
+                        <td data-label="Sender Address">{{ shipment[2] }}</td>
+                        <td data-label="Recipient Name">{{ shipment[3] }}</td>
+                        <td data-label="Recipient Address">{{ shipment[4] }}</td>
+                        <td data-label="Status">{{ shipment[5] }}</td>
+                        <td data-label="Action">
                             <form action="{{ url_for('mark_delivered', shipment_id=shipment[0]) }}" method="POST">
                                 <button class="mark_delivered-btn" type="submit">Mark as Delivered</button>
                             </form>
@@ -215,9 +215,10 @@
             document.getElementById(tabId).style.display = "block";
             evt.currentTarget.className += " active";
         }
-        </script>
-        
 
-    <script src="/static/hideFlash.js"></script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector(".tab-button.active").click();
+        });
+    </script>
 </body>
 </html>
