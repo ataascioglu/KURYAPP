@@ -102,7 +102,3 @@ KURYAPP is a Flask-based web application designed for managing shipments. Users 
 ### Session Management
 
 - **/logout**: Log out the current user.
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
